@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MJ</title>
+    <link href="https://fonts.googleapis.com/css?family=Sofia" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.6.0/gsap.min.js"></script>
+     <style>
+    :root {
+      --bg-top: #1b2735;
+      --bg-bottom: #090a0f;
+      --star-color: rgba(255, 255, 255, 0.8);
+      --heart-color: #ff4466;
+      /* Vintage colors */ 
+      --vintage-paper: #f4e4bc;
+      --vintage-paper-dark: #e2d2aa;
+      --vintage-ink: #2c1810;
+      --vintage-seal: #8b4513;
+      --vintage-seal-dark: #5c2c0e;
+      --vintage-shadow: rgba(44, 24, 16, 0.2);
+      --vintage-border: #d4c4a0;
+    }
+
+    * {
+      padding: 0;
+      margin: 0;
+      box-sizing: border-box;
+    }
+
+    html, body {
+      height: 100%;
+    }
+
+    body {
+      width: 100%;
+      /* ✅ CHANGED: background now uses radial gradient like your other code */
+      background: radial-gradient(ellipse at bottom, var(--bg-top) 0%, var(--bg-bottom) 100%);
+      font-size: 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+    }
+
+    /* Starry background */
+    .stars {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .star {
+      position: absolute;
+      background: var(--star-color);
+      border-radius: 50%;
+      animation: twinkle var(--duration, 2s) ease-in-out infinite var(--delay, 0s);
+    }
+
+    @keyframes twinkle {
+      0%, 100% { opacity: 0.2; transform: scale(0.8); }
+      50% { opacity: 1; transform: scale(1); }
+    }
+
+    /* Floating hearts */
+    .floating-hearts {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .heart {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      opacity: 0;
+      transform: translateY(0);
+      animation: float-heart var(--duration, 15s) linear infinite var(--delay, 0s);
+    }
+
+    @keyframes float-heart {
+      0% {
+        opacity: 0;
+        transform: translateY(100vh) rotate(0deg);
+      }
+      10% {
+        opacity: 1;
+      }
+      90% {
+        opacity: 1;
+      }
+      100% {
+        opacity: 0;
+        transform: translateY(-100vh) rotate(720deg);
+      }
+    }
+
+        /* Music Player Styles */
+        .music-player {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(44, 24, 16, 0.9);
+            border: 2px solid var(--vintage-paper);
+            border-radius: 15px;
+            padding: 15px;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            z-index: 1000;
+            transform: translateX(0);
+            transition: transform 0.3s ease-in-out;
+        }
+
+        .music-player:hover {
+            opacity: 1;
+        }
+
+        .music-control {
+            background: var(--vintage-paper);
+            border: none;
+            border-radius: 50%;
+            width: 44px;
+            height: 44px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            transition: all 0.3s ease;
+            box-shadow: 2px 2px 8px rgba(0,0,0,0.2);
+        }
+
+        .music-control:hover {
+            transform: scale(1.1);
+            box-shadow: 2px 2px 12px rgba(0,0,0,0.3);
+        }
+
+        .song-selector {
+            background: var(--vintage-paper);
+            border: 1px solid var(--vintage-seal);
+            padding: 5px;
+            border-radius: 8px;
+            color: var(--vintage-ink);
+            font-family: 'Sofia', cursive;
+            cursor: pointer;
+            max-width: 150px;
+            display: none;
+        }
+
+        .music-player:hover .song-selector {
+            display: block;
+        }
+
+        .volume-control {
+            display: none;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .music-player:hover .volume-control {
+            display: flex;
+        }
+
+        #volumeSlider {
+            width: 80px;
+            height: 4px;
+            -webkit-appearance: none;
+            background: var(--vintage-paper);
+            border-radius: 2px;
+            outline: none;
+        }
+
+        #volumeSlider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 12px;
+            height: 12px;
+            background: var(--vintage-seal);
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        #volumeIcon {
+            color: var(--vintage-paper);
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .envelop {
+            width: 15rem;
+            height: 10rem;
+            position: absolute;
+            left: 0;
+            right: 0;
+            margin: auto;
+        }
+
+        .envelop__front-paper,
+        .envelop__back-paper,
+        .envelop__up-paper {
+            width: 100%;
+            height: 100%;
+            bottom: 0;
+            left: 0;
+            position: absolute;
+            border-radius: 0.7rem;
+        }
+
+        .envelop__front-paper {
+            border: 0.35rem solid var(--vintage-seal);
+            background-color: var(--vintage-paper);
+            clip-path: polygon(100% 0%, 50% 70%, 0% 0%, 0% 100%, 100% 100%);
+            z-index: 300;
+            box-shadow: 2px 2px 15px var(--vintage-shadow);
+            background-image: 
+                linear-gradient(45deg, var(--vintage-paper-dark) 25%, transparent 25%),
+                linear-gradient(-45deg, var(--vintage-paper-dark) 25%, transparent 25%),
+                linear-gradient(45deg, transparent 75%, var(--vintage-paper-dark) 75%),
+                linear-gradient(-45deg, transparent 75%, var(--vintage-paper-dark) 75%);
+            background-size: 20px 20px;
+            background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+            opacity: 0.9;
+        }
+
+        .envelop__back-paper {
+            background-color: var(--vintage-seal);
+            clip-path: polygon(0% 0%, 100% 0%, 90% 100%, 0% 90%);
+            z-index: 100;
+            box-shadow: 3px 3px 20px var(--vintage-shadow);
+        }
+
+        .envelop__up-paper {
+            position: relative;
+            background-color: var(--vintage-seal);
+            z-index: 400;
+            clip-path: polygon(0% 0%, 100% 0%, 50% 81%);
+            box-shadow: 0 -2px 15px var(--vintage-shadow);
+            background-image: linear-gradient(
+                to bottom,
+                var(--vintage-seal-dark),
+                var(--vintage-seal)
+            );
+        }
+
+        .envelop__sticker,
+        .envelop__false-sticker {
+            position: absolute;
+            margin: auto;
+            background-image: url("https://www.freepnglogos.com/uploads/heart-png/emoji-heart-33.png");
+            background-color: var(--vintage-seal);
+            border: 0.3rem solid var(--vintage-seal-dark);
+            background-size: 2rem;
+            background-position: center;
+            background-repeat: no-repeat;
+            box-shadow: 2px 2px 10px var(--vintage-shadow);
+            transform-style: preserve-3d;
+            transform: perspective(1000px) rotateX(5deg);
+        }
+
+        .envelop__sticker {
+            width: 100%;
+            height: 20%;
+            top: 30%;
+            left: 0;
+            bottom: 0;
+            right: 0;
+            z-index: 400;
+        }
+
+        .envelop__false-sticker {
+            width: 20%;
+            height: 20%;
+            top: 30%;
+            left: 80%;
+            bottom: 0;
+            right: 0;
+            z-index: 300;
+        }
+
+        .envelop__content {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            z-index: 200;
+        }
+
+        .love-notes {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .note {
+            width: 95%;
+            height: 30%;
+            background-color: var(--vintage-paper);
+            position: absolute;
+            overflow: hidden;
+            transition: height 0.5s, opacity 0.25s;
+            box-shadow: 2px 2px 10px var(--vintage-shadow);
+            border: 1px solid var(--vintage-border);
+            background-image: 
+                linear-gradient(90deg, rgba(44, 24, 16, 0.05) 1px, transparent 1px),
+                linear-gradient(rgba(44, 24, 16, 0.05) 1px, transparent 1px);
+            background-size: 20px 20px;
+            border-radius: 5px;
+        }
+
+        .note:nth-child(1) { bottom: 60%; transform: rotate(-1deg); }
+        .note:nth-child(2) { bottom: 40%; transform: rotate(1deg); }
+        .note:nth-child(3) { bottom: 20%; transform: rotate(-0.5deg); }
+
+        .note:hover {
+            cursor: pointer;
+            height: 45%;
+        }
+
+        .note__text {
+    font-family: "Sofia";
+    padding: 1.5rem;
+    color: var(--vintage-ink);
+    position: relative;
+
+    /* Add this to make text scrollable */
+    overflow-y: auto;
+    max-height: 100%;
+}
+
+
+        .note__text::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: repeating-linear-gradient(
+                90deg,
+                var(--vintage-border),
+                var(--vintage-border) 2px,
+                transparent 2px,
+                transparent 10px
+            );
+            opacity: 0.5;
+        }
+
+        .note__text p {
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+            text-align: center;
+            line-height: 1.6;
+            text-shadow: 1px 1px 1px var(--vintage-shadow);
+            background: linear-gradient(180deg, 
+                var(--vintage-ink) 0%,
+                var(--vintage-ink) 95%,
+                transparent 100%
+            );
+            -webkit-background-clip: text;
+            background-clip: text;
+        }
+
+        .scissors {
+            cursor: url("https://i.postimg.cc/GtLCdKxR/sisors.png"), pointer;
+        }
+
+        .scissors:active {
+            cursor: url("https://i.postimg.cc/GtXQ7WPZ/pngwing-com.png"), pointer;
+        }
+
+        .cursor {
+            cursor: pointer;
+        }
+
+        @media (max-height: 500px) {
+            body {
+                margin: 25% 0 25% 0;
+            }
+        }
+
+        @media (min-width: 400px) and (max-width: 600px) {
+            .envelop {
+                width: 20rem;
+                height: 15rem;
+            }
+            .note__text p {
+                font-size: 1.025rem;
+            }
+        }
+
+        @media (min-width: 600px) {
+            .envelop {
+                width: 25rem;
+                height: 20rem;
+            }
+            .note__text p {
+                font-size: 1.15rem;
+            }
+            .envelop__sticker,
+            .envelop__false-sticker {
+                height: 15%;
+            }
+        }
+
+        @media (min-width: 600px) and (min-height: 600px) {
+            .envelop {
+                bottom: 20%;
+            }
+        }
+
+        @media (max-width: 400px) {
+            .envelop__sticker,
+            .envelop__false-sticker {
+                background-size: 1.2rem;
+            }
+        }
+    </style>
+</head>
+<body class="scissors">
+    <div class="stars" id="starsContainer"></div>
+    <div class="floating-hearts" id="heartsContainer"></div>
+    <div class="music-player">
+        <button class="music-control" id="musicControl" aria-label="Toggle background music">🎵</button>
+       <audio id="bgMusic" loop playsinline>
+    <source src="The_Mar_as_-_Heavy_(mp3.pm).mp3" type="audio/mpeg">
+</audio>
+
+
+        <div class="volume-control">
+            <input type="range" id="volumeSlider" min="0" max="100" value="50">
+            <span id="volumeIcon">🔊</span>
+        </div>
+    </div>
+    
+    <div class="envelop">
+        <div class="envelop__front-paper"></div>
+        <div class="envelop__back-paper"></div>
+        <div class="envelop__up-paper js-up-paper"></div>
+        <div class="envelop__sticker js-sticker"></div>
+        <div class="envelop__false-sticker"></div>
+        <div class="envelop__content js-envelop-content">
+            <div class="love-notes">
+                <div class="note js-note">
+                    <div class="note__text">
+                        <p>Hey princess, I’ve been thinking about you a lot and I really miss you. Even though we haven’t met yet, I keep imagining how nice it would be to see you every day, just chilling, talking, or laughing at random things. I wish I could be there with you right now, sharing little moments and just making life feel lighter together.</p>
+                    </div>
+                </div>
+                <div class="note js-note">
+                    <div class="note__text">
+                        <p>I hope everything you’re going through gets easier soon. I know dealing with things alone can be rough, and I wish I could be there to help, even in small ways. I keep picturing us being there for each other, laughing through the hard parts, and just making life more fun together. I really want the day we can finally meet and spend time together.</p>
+                    </div>
+                </div>
+                <div class="note js-note">
+                    <div class="note__text">
+                        <p>I MISS YOUUUU</p>
+                        <p>MJ</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Create stars
+        function createStars() {
+            const container = document.getElementById('starsContainer');
+            const count = Math.min(window.innerWidth / 2, 400);
+            
+            for (let i = 0; i < count; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                
+                const size = 1 + Math.random() * 2;
+                const left = Math.random() * 100;
+                const top = Math.random() * 100;
+                const duration = 2 + Math.random() * 3;
+                const delay = Math.random() * 3;
+                
+                star.style.cssText = `
+                    width: ${size}px;
+                    height: ${size}px;
+                    left: ${left}%;
+                    top: ${top}%;
+                    --duration: ${duration}s;
+                    --delay: -${delay}s;
+                    opacity: ${0.2 + Math.random() * 0.8};
+                `;
+                
+                container.appendChild(star);
+            }
+        }
+
+        // Create floating hearts
+        function createHearts() {
+            const container = document.getElementById('heartsContainer');
+            const colors = ['#ff5c8a', '#ffb86b', '#ffd1c4', '#ff9eb4'];
+            let heartCount = 0;
+            
+            function createHeart() {
+                if (heartCount >= 10000) return;
+                
+                const heart = document.createElement('div');
+                heart.className = 'heart';
+                
+                const size = 8 + Math.random() * 32;
+                const left = Math.random() * 100;
+                const duration = 15 + Math.random() * 10;
+                const delay = Math.random() * 15;
+                const color = colors[Math.floor(Math.random() * colors.length)];
+                
+                heart.innerHTML = `<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+                    <path fill="${color}" d="M16 29s-12-7.4-12-15a6.5 6.5 0 0 1 11-4 6.5 6.5 0 0 1 11 4c0 7.6-10 15-10 15z"/>
+                </svg>`;
+                
+                heart.style.cssText = `
+                    width: ${size}px;
+                    height: ${size}px;
+                    left: ${left}%;
+                    --duration: ${duration}s;
+                    --delay: -${delay}s;
+                `;
+                
+                container.appendChild(heart);
+                heartCount++;
+                
+                setTimeout(() => {
+                    heart.remove();
+                    heartCount--;
+                    createHeart();
+                }, duration * 1000);
+            }
+            
+            // Initial creation of hearts
+            for (let i = 0; i < 200; i++) {
+                setTimeout(() => createHeart(), i * 50);
+            }
+        }
+
+        // Music Player Controls
+        const musicControl = document.getElementById('musicControl');
+        const songSelector = document.getElementById('songSelector');
+        const volumeSlider = document.getElementById('volumeSlider');
+        const volumeIcon = document.getElementById('volumeIcon');
+        const bgMusic = document.getElementById('bgMusic');
+        let isMusicPlaying = false;
+        let previousVolume = 0.5; // Store previous volume for mute/unmute
+
+        // Set start point (example: 45 seconds)
+bgMusic.currentTime = 13;
+        // Initialize volume
+        bgMusic.volume = previousVolume;
+
+        // Attempt autoplay on page load
+// Attempt autoplay on page load
+window.addEventListener('load', () => {
+  bgMusic.play().then(() => {
+    isMusicPlaying = true;
+    musicControl.innerHTML = '⏸️';
+    bgMusic.muted = false; // unmute after autoplay
+    console.log('🎵 Music autoplayed successfully');
+  }).catch(e => {
+    console.log('🚫 Autoplay failed (browser restriction):', e);
+  });
+});
+
+// ✅ Backup: Start music automatically on first user interaction
+document.addEventListener('click', () => {
+  if (!isMusicPlaying) {
+    bgMusic.play().then(() => {
+      isMusicPlaying = true;
+      musicControl.innerHTML = '⏸️';
+      console.log('🎵 Music started after user interaction');
+    }).catch(err => console.log('Audio playback failed:', err));
+  }
+}, { once: true });
+
+
+        // Play/Pause control
+        musicControl.addEventListener('click', () => {
+            if (!isMusicPlaying) {
+                bgMusic.play().then(() => {
+                    isMusicPlaying = true;
+                    musicControl.innerHTML = '⏸️';
+                    musicControl.style.transform = 'scale(1.2)';
+                    setTimeout(() => musicControl.style.transform = '', 200);
+                }).catch(e => console.log('Audio playback failed:', e));
+            } else {
+                bgMusic.pause();
+                isMusicPlaying = false;
+                musicControl.innerHTML = '▶️';
+            }
+        });
+
+        // Song selection removed - using single background music
+
+        // Volume control
+        volumeSlider.addEventListener('input', function() {
+            const volume = this.value / 100;
+            bgMusic.volume = volume;
+            previousVolume = volume;
+            updateVolumeIcon(volume);
+        });
+
+        // Mute/Unmute
+        volumeIcon.addEventListener('click', function() {
+            if (bgMusic.volume > 0) {
+                bgMusic.volume = 0;
+                volumeSlider.value = 0;
+                volumeIcon.textContent = '🔇';
+            } else {
+                bgMusic.volume = previousVolume;
+                volumeSlider.value = previousVolume * 100;
+                updateVolumeIcon(previousVolume);
+            }
+        });
+
+        // Update volume icon based on level
+        function updateVolumeIcon(volume) {
+            if (volume === 0) volumeIcon.textContent = '🔇';
+            else if (volume < 0.3) volumeIcon.textContent = '🔈';
+            else if (volume < 0.7) volumeIcon.textContent = '🔉';
+            else volumeIcon.textContent = '🔊';
+        }
+
+        // Initialize stars and hearts
+        createStars();
+        createHearts();
+
+        let mobile_media_query = window.matchMedia("(max-width: 400px)");
+        let tablet_media_query = window.matchMedia(
+            "(min-width: 400px) and (max-width: 600px)"
+        );
+        const notes = document.querySelectorAll(".js-note");
+
+        function recize_notes() {
+            for (let i = 0; i < notes.length; i++) {
+                if (notes[i].classList.contains("active")) {
+                    notes[i].classList.remove("active");
+                    gsap.set(notes[i], {
+                        height: "30%",
+                        clearProps: "all"
+                    });
+                }
+            }
+        }
+
+        function notes_ready() {
+            gsap.to(".js-envelop-content", {
+                height: "110%",
+                duration: 0.5
+            });
+
+            for (let i = 0; i < notes.length; i++) {
+                notes[i].addEventListener("click", function () {
+                    if (mobile_media_query.matches) {
+                        if (this.classList.contains("active")) {
+                            this.classList.remove("active");
+                            gsap.set(this, {
+                                height: "30%",
+                                clearProps: "all"
+                            });
+                        } else {
+                            for (let i = 0; i < notes.length; i++) {
+                                if (notes[i].classList.contains("active")) {
+                                    notes[i].classList.remove("active");
+                                    gsap.set(notes[i], {
+                                        height: "30%",
+                                        clearProps: "all"
+                                    });
+                                }
+                            }
+                            this.classList.add("active");
+                            gsap.set(this, {
+                                height: 125 + 40 * i + "%"
+                            });
+                        }
+                    } else if (tablet_media_query.matches) {
+                        if (this.classList.contains("active")) {
+                            this.classList.remove("active");
+                            gsap.set(this, {
+                                height: "30%",
+                                clearProps: "all"
+                            });
+                        } else {
+                            for (let i = 0; i < notes.length; i++) {
+                                if (notes[i].classList.contains("active")) {
+                                    notes[i].classList.remove("active");
+                                    gsap.set(notes[i], {
+                                        height: "30%",
+                                        clearProps: "all"
+                                    });
+                                }
+                            }
+                            this.classList.add("active");
+                            gsap.set(this, {
+                                height: 80 + 21 * i + "%"
+                            });
+                        }
+                    } else {
+                        if (this.classList.contains("active")) {
+                            this.classList.remove("active");
+                            gsap.set(this, {
+                                height: "30%",
+                                clearProps: "all"
+                            });
+                        } else {
+                            for (let i = 0; i < notes.length; i++) {
+                                if (notes[i].classList.contains("active")) {
+                                    notes[i].classList.remove("active");
+                                    gsap.set(notes[i], {
+                                        height: "30%",
+                                        clearProps: "all"
+                                    });
+                                }
+                            }
+                            this.classList.add("active");
+                            gsap.set(this, {
+                                height: 70 + 20 * i + "%"
+                            });
+                        }
+                    }
+                });
+            }
+        }
+
+        function set_up_paper() {
+            var arr = [0, 0, 100, 0, 50, 61];
+            gsap.set(".js-up-paper", {
+                bottom: "97%",
+                rotation: 180,
+                zIndex: 200,
+                clipPath:
+                    "polygon(" +
+                    arr[0] +
+                    "%" +
+                    arr[1] +
+                    "%," +
+                    arr[2] +
+                    "%" +
+                    arr[3] +
+                    "%," +
+                    arr[4] +
+                    "%" +
+                    arr[5] +
+                    "%)",
+                onComplete: notes_ready
+            });
+        }
+
+        function envelop_transition() {
+            gsap.to(".js-up-paper", {
+                bottom: "1%",
+                duration: 0.25,
+                onComplete: set_up_paper
+            });
+            document
+                .querySelector(".js-up-paper")
+                .removeEventListener("click", envelop_transition);
+            document.querySelector(".js-up-paper").classList.remove("cursor");
+        }
+
+        function sticker() {
+            gsap.set(".js-sticker", { width: "20%", left: "-80%" });
+            document.body.classList.remove("scissors");
+            document.querySelector(".js-sticker").removeEventListener("click", sticker);
+            document
+                .querySelector(".js-up-paper")
+                .addEventListener("click", envelop_transition);
+            document.querySelector(".js-up-paper").classList.add("cursor");
+        }
+
+        document.querySelector(".js-sticker").addEventListener("click", sticker);
+
+        window.onresize = function (event) {
+            recize_notes();
+        };
+    </script>
+</body>
+</html>
