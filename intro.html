@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Intro</title>
+<link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap" rel="stylesheet"> <!-- Cute font -->
+<style>
+    :root {
+        --bg-start: #1b2735;
+        --bg-end: #090a0f;
+        --star-color: rgba(255,255,255,0.8);
+    }
+
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    html, body {
+        height: 100%;
+        font-family: 'Patrick Hand', cursive; /* Cute handwriting font */
+    }
+
+    body {
+        background: radial-gradient(ellipse at bottom, var(--bg-start) 0%, var(--bg-end) 100%);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        overflow: hidden;
+        color: #fff;
+        flex-direction: column;
+        text-align: center;
+        padding: 20px;
+    }
+
+    /* Starry background */
+    .stars {
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        z-index: 0;
+    }
+
+    .star {
+        position: absolute;
+        width: 2px;
+        height: 2px;
+        background: var(--star-color);
+        border-radius: 50%;
+        animation: twinkle 2s ease-in-out infinite;
+    }
+
+    @keyframes twinkle {
+        0%, 100% { opacity: 0.2; transform: scale(0.8); }
+        50% { opacity: 1; transform: scale(1); }
+    }
+
+    .intro-text {
+        position: relative;
+        z-index: 1;
+        font-size: 1.8em;
+        line-height: 1.5em;
+        white-space: pre-wrap; /* preserves line breaks */
+    }
+
+    .start-btn {
+        margin-top: 30px;
+        padding: 10px 20px;
+        font-size: 1.2em;
+        background: rgba(255,255,255,0.1);
+        border: 1px solid #fff;
+        border-radius: 8px;
+        color: #fff;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: none; /* hidden initially */
+    }
+
+    .start-btn:hover {
+        background: rgba(255,255,255,0.3);
+    }
+</style>
+</head>
+<body>
+    <div class="stars" id="starsContainer"></div>
+    <div class="intro-text" id="introText"></div>
+    <button class="start-btn" id="startBtn" onclick="goToMain()">Here</button>
+
+<script>
+    // Create random stars
+    const starsContainer = document.getElementById('starsContainer');
+    for(let i = 0; i < 100; i++){
+        const star = document.createElement('div');
+        star.className = 'star';
+        star.style.top = Math.random() * 100 + 'vh';
+        star.style.left = Math.random() * 100 + 'vw';
+        star.style.animationDuration = 1 + Math.random() * 3 + 's';
+        star.style.animationDelay = Math.random() * 5 + 's';
+        starsContainer.appendChild(star);
+    }
+
+    function goToMain() {
+        window.location.href = "MJ.html"; // replace with your main page
+    }
+
+    // Typewriter effect
+    const text = "Hi my beautiful princess 💖\n\nEven though my handwriting could never capture what’s in my heart, I wanted to give you something made just for you. Every word, every thought, every little thing I’ve created here carries a piece of me for you. I hope it makes you feel as special and cherished as you truly are to me.";
+    const introText = document.getElementById('introText');
+    const startBtn = document.getElementById('startBtn');
+    let i = 0;
+
+    function typeWriter() {
+        if (i < text.length) {
+            introText.innerHTML += text.charAt(i) === '\n' ? '<br>' : text.charAt(i);
+            i++;
+            setTimeout(typeWriter, 50); // 50ms per character
+        } else {
+            // Show the enter button after text finishes
+            startBtn.style.display = 'inline-block';
+        }
+    }
+
+    window.onload = typeWriter;
+</script>
+</body>
+</html>
